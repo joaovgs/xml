@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Aplicação de Contatos</title>
+</head>
+<body>
+    <h1>Aplicação de Contatos</h1>
+    <form id="contato-form">
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" required><br>
+
+        <label for="telefone">Telefone:</label>
+        <input type="text" id="telefone" required><br>
+
+        <label for="email">E-mail:</label>
+        <input type="email" id="email" required><br>
+
+        <button type="button" onclick="adicionarContato()">Adicionar Contato</button>
+    </form>
+
+    <h2>Contatos</h2>
+    <ul id="lista-contatos"></ul>
+
+    <button onclick="salvarContatos()">Salvar Contatos</button>
+    <button onclick="removerContatos()">Remover Todos os Contatos</button>
+
+    <script>
+        function adicionarContato() {
+            const nome = document.getElementById("nome").value;
+            const telefone = document.getElementById("telefone").value;
+            const email = document.getElementById("email").value;
+
+            const listaContatos = JSON.parse(localStorage.getItem("contatos")) || [];
+            const contato = { nome, telefone, email };
+            listaContatos.push(contato);
+            localStorage.setItem("contatos", JSON.stringify(listaContatos));
+
+            listarContatos();
+            document.getElementById("contato-form").reset();
+        }
+
+        function removerContatos() {
+            localStorage.removeItem("contatos");
+            listarContatos();
+        }
+
+        function listarContatos() {
+            const listaContatos = JSON.parse(localStorage.getItem("contatos")) || [];
+            const listaContatosElement = document.getElementById("lista-contatos");
+            listaContatosElement.innerHTML = "";
+
+            listaContatos.forEach((contato, index) => {
+                const item = document.createElement("li");
+                item.innerHTML = `
+                    Contato ${index + 1}:<br>
+                    Nome: ${contato.nome}<br>
+                    Telefone: ${contato.telefone}<br>
+                    E-mail: ${contato.email}<br>
+                `;
+                listaContatosElement.appendChild(item);
+            });
+        }
+
+        function salvarContatos() {
+            const listaContatos = JSON.parse(localStorage.getItem("contatos")) || [];
+
+            const xmlHeader = '<?xml version="1.0" encoding="UTF-8"?>\n<contatos>\n';
+            const xmlFooter = '\n</contatos>';
+            let xmlContatos = '';
+
+            listaContatos.forEach((contato) => {
+                xmlContatos += `
+                    <contato>
+                        <nome>${contato.nome}</nome>
+                        <telefone>${contato.telefone}</telefone>
+                        <email>${contato.email}</email>
+                    </contato>
+                `;
+            });
+
+            const xmlData = xmlHeader + xmlContatos + xmlFooter;
+            const blob = new Blob([xmlData], { type: "text/xml" });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "contatos.xml";
+            a.click();
+        }
+
+        listarContatos();
+    </script>
+</body>
+</html>
